@@ -1,8 +1,7 @@
 import argparse
-from ast import arg, parse
-from dataclasses import dataclass
 from enum import Enum
 import hashlib
+from random import randint
 
 class Encoding(Enum):
     utf8 = 'UTF-8'
@@ -44,11 +43,24 @@ args = parser.parse_args()
 input_file_path = args.file
 encoding = args.encoding.value
 output_file_path = args.output
-number_of_generated_values = args.n
+number_of_generated_values = int(args.n)
 
 with open(input_file_path, 'r', encoding=encoding) as input_file, open(output_file_path, 'w', encoding=encoding) as output_file:
-    for i, line in enumerate(input_file):
+    i = 0
+    line = input_file.readline()
+    while i < number_of_generated_values and len(line) != 0:
         hash_function = args.function.get_function()
         hash_function().update(line.encode(encoding=encoding))
         hashed_line = hash_function().hexdigest()
-        output_file.write(hashed_line)
+        output_file.write(hashed_line + '\n')
+        i += 1
+        line = input_file.readline()
+    
+    while i < number_of_generated_values:
+        random_number = str(randint(1, 1_000_000_000))
+        hash_function = args.function.get_function()
+        hash_function().update(random_number.encode(encoding=encoding))
+        hashed_line = hash_function().hexdigest()
+        output_file.write(hashed_line + '\n')
+        i += 1
+        
